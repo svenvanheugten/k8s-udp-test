@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: udp-test-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: udp-test-client
+  template:
+    metadata:
+      labels:
+        app: udp-test-client
+    spec:
+      containers:
+      - name: udp-test-client
+        image: udp-test-client
+
+---
+
+apiVersion: kbld.k14s.io/v1alpha1
+kind: Sources
+sources:
+- image: udp-test-client
+  path: ./Client
+
+---
+
+apiVersion: kbld.k14s.io/v1alpha1
+kind: ImageDestinations
+destinations:
+- image: udp-test-client
+  newImage: svenvanheugten/udp-test-client
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: udp-test-server
+spec:
+  selector:
+    app: udp-test-server
+  ports:
+    - protocol: UDP
+      port: 1234
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: udp-test-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: udp-test-server
+  template:
+    metadata:
+      labels:
+        app: udp-test-server
+    spec:
+      containers:
+      - name: udp-test-server
+        image: udp-test-server
+        ports:
+        - containerPort: 1234
+
+---
+
+apiVersion: kbld.k14s.io/v1alpha1
+kind: Sources
+sources:
+- image: udp-test-server
+  path: ./Server
+
+---
+
+apiVersion: kbld.k14s.io/v1alpha1
+kind: ImageDestinations
+destinations:
+- image: udp-test-server
+  newImage: svenvanheugten/udp-test-server
